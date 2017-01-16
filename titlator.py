@@ -7,7 +7,7 @@
 
 import dbapi
 
-db = dbapi.dbs()
+db = dbapi.dbs(l=False, s=False)
 
 
 def levenshteinDistance(s1, s2):
@@ -57,7 +57,7 @@ cols = [
 def get_title(string, titles = []):
 	string = string.split('[')[0].lower().strip()
 	if titles == []:
-		print 'grabbing title data'
+		print ('grabbing title data')
 		titles.extend(map(
 						lambda x: dict(zip(cols,x)),
 						db.p.ex(get_book_ids)
@@ -67,7 +67,7 @@ def get_title(string, titles = []):
 		i['dist'] = levenshteinDistance(i['simple_title'], string)
 	matches = sorted(titles, key = lambda x: x['dist'])[:5]
 	if matches[0]['dist'] == 0:
-		#print 'found an exact match!'
+		#print ('found an exact match!')
 		return [matches[0]]
 	else:
 		return matches
