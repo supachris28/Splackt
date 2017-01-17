@@ -11,7 +11,7 @@ jira_reg = '(\w+-\d+)'
 def check_slack(message, incoming_message):
     jira_url = 'https://packtpub.atlassian.net/rest/api/2/search?jql=id=' + incoming_message
     print('checking JIRA for ' + incoming_message)
-    r = requests.get(url=jira_url, headers={'Authorization': 'Basic Y2hyaXNrQHBhY2t0cHViLmNvbTpSTUlTZGV2MDgh', 'Content-Type': 'application/json', 'accept':'application/json'})
+    r = requests.get(url=jira_url, headers={'Authorization': splackt_settings.JIRA_AUTH, 'Content-Type': 'application/json', 'accept':'application/json'})
     j = r.json()
     if r.status_code == 200 and j['total'] == 1:
         title = j['issues'][0]['fields']['summary']
