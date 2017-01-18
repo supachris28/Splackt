@@ -228,16 +228,16 @@ def search_titles(message, title=''):
     message.reply('k, Looking for 20 recent titles containing the string "%s"'% title)
     ox = titlator.db.p.ex('''
         SELECT isbn10, published_date,CONVERT(title using ascii) from home.dim_products
-         WHERE title like \'%%%s%%\' 
+         WHERE title like \'%%'''+title+'''%%\' 
              and published_date < curdate()
              and type='books'
          order by published_date desc
-        ''' % title)
+        ''')
     message.reply('Found %d Results' % len(ox))
     att = [
         {
             'fallback':'Search Results',
-            'text':'\n'.join(map(lambda x: '%s - [%s] - %s' %x, ox[:20]))
+            'text':'\n'.join(map(lambda x: '{0} - [{1}] - {2}'.format(*x), ox[:20]))
         }
     ]
     message.send_webapi('',json.dumps(att))
