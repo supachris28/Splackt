@@ -1,3 +1,5 @@
+# coding=utf-8
+
 from slackbot.bot import respond_to, listen_to
 import io
 import re
@@ -140,10 +142,11 @@ def getSimpleData(message, incoming_message, search_type, search_content, search
     if sql != "":
         print(sql)
         message.reply("Looking...")
-        ox = titlator.db.p.ex(sql)
+        res = titlator.db.p.execute(sql)
+        ox = res.fetchall()
         
         
-        #print(ox)
+        print(ox)
         if group_by:
             plot_results(message, ox, "", re.search("(by|each) (day|week|month)", incoming_message.lower(), re.IGNORECASE).group(2), search_type)
             message.reply('\n'.join(map(lambda x: '%s - %s' %x, ox)))
