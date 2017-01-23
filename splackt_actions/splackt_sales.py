@@ -19,6 +19,7 @@ import splackt_helper
 #import pandas
 
 g = py2neo.Graph('http://neo4j:skynet@178.62.55.202:7474/db/data')
+print('[splackt_sales] loaded')
 
 
 # standard word lists
@@ -29,7 +30,7 @@ engagement_keywords = "(page ?views|engagement)"
 
 
 @respond_to("(.*)")
-#@listen_to("(.*)")
+@listen_to("(.*)")
 def testLooking(message, incoming_message):
     
     incoming_message = incoming_message.replace('?', '')
@@ -57,6 +58,11 @@ def testLooking(message, incoming_message):
     
     response += " info"
     
+    
+    if response == "You're looking for info":
+        response = "I don't understand you.... try it again in Klingon"
+        return
+    
     m = re.search(product_types, incoming_message, re.IGNORECASE)
     if m:
         response += " for " + m.group(0)
@@ -74,10 +80,6 @@ def testLooking(message, incoming_message):
         response += " over the period " + m.group(1)
         search_period = m.group(1)
     
-    
-    if response == "You're looking for info":
-        response = "I don't understand you.... try it again in Klingon"
-        return
     
     message.reply(response)
     splackt_helper.getSimpleSalesData(message, incoming_message, search_type, search_content, search_period)

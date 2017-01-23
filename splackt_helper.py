@@ -80,12 +80,115 @@ def getSimpleSalesData(message, incoming_message, search_type, search_content, s
         print(ox)
         if group_by:
             plot_results(message, ox, "", re.search("(by|each) (day|week|month)", incoming_message.lower(), re.IGNORECASE).group(2), search_type)
-            message.reply('\n'.join(map(lambda x: '{0} - {1}'.format(x[0],x[1]), ox)))
+            att = [
+                {
+                    'fallback':'search results',
+                    'text': '\n'.join(map(lambda x: '{0} - {1}'.format(x[0],x[1]), ox))
+                }
+            ]
+            
+            message.send_webapi('', json.dumps(att))
         else:
             message.reply("Answer: " + str(ox[0][0]))
     else:
         message.reply("I can't figure that out yet, ask someone in the data team...")
 
+
+def getSimpleEngagementData(message, incoming_message, search_type, search_content, search_period):
+    print("searching:" + search_type)
+    print("for: " + search_content)
+    
+    sql = ""
+    date_value = ""
+    table_name = ""
+    metric = []
+    
+    if search_type == "engagement":
+        date_value = "read_date"
+        table_name = "home.fact_views"
+        if "page" in incoming_message:
+            metric.append("SUM(read_pageviews) as `pages`")
+        
+        if "title" in incoming_message or "book" in incoming_message:
+            metric.append("COUNT(DISTINCT title_product_nid) as `books`")
+        
+        if "user" in incoming_message:
+            metric.append("COUNT(DISTINCT user_id) as `users`")
+        
+        if metric.count == 0:
+            return
+        
+        group_by = check_each(incoming_message, date_value)
+        sql = "SELECT " + group_by
+        if group_by != "":
+            sql += ", "
+        sql += ", ".join(metric)
+        sql += " FROM " + table_name + " WHERE 1=1 "
+        
+        if "mapt pro" in incoming_message.lower():
+            sql += " AND subscription_title LIKE 'Mapt - Pro%%'"
+        
+        if "mapt basic" in incoming_message.lower():
+            sql += " AND subscription_title LIKE 'Mapt - Basic%%'"
+        
+        if "paid" in incoming_message.lower():
+            sql += " AND subscription_title NOT LIKE '%%Trial'"
+        
+        if "monthly" in incoming_message.lower():
+            sql += " AND subscription_title LIKE '%%month%%'"
+        
+        if "annual" in incoming_message.lower():
+            sql += " AND subscription_title NOT LIKE '%%month%%'"
+        
+        
+        
+        
+        if search_period != "":
+            print("search_period: " + search_period)
+            if len(search_period) == 4:
+                sql += " AND " + date_value + " BETWEEN '" + date_to_string(period_to_date(search_period)) + "' AND '" + date_to_string(date_add_year(period_to_date(search_period))) + "'"
+            if search_period.count('-') == 1:
+                sql += " AND " + date_value + " BETWEEN '" + date_to_string(period_to_date(search_period)) + "' AND '" + date_to_string(date_add_month(period_to_date(search_period))) + "'"
+            if search_period.count('-') == 2:
+                sql += " AND " + date_value + " BETWEEN '" + date_to_string(period_to_date(search_period)) + "' AND '" + date_to_string(date_add_day(period_to_date(search_period))) + "'"
+            if 'W' in search_period:
+                sql += " AND " + date_value + " BETWEEN '" + date_to_string(period_to_date(search_period)) + "' AND '" + date_to_string(date_add_week(period_to_date(search_period))) + "'"
+        else:
+            today = datetime.datetime.now()
+            this_month = period_to_date(str(today.year) + "-" + str(today.month))
+            sql += " AND " + date_value + " BETWEEN '" + date_to_string(this_month) +"' AND '" + date_to_string(date_add_month(this_month)) + "'"
+            message.reply("No date found so looking for this month only...")
+        
+        if group_by != "":
+            sql += " GROUP BY " + group_by + " ORDER BY 1 "
+        
+    if sql != "":
+        print(sql)
+        message.reply("Looking...")
+        res = titlator.db.p.execute(sql)
+        ox = res.fetchall()
+        
+        
+        print(ox)
+        if group_by:
+            plot_results(message, ox, "", re.search("(by|each) (day|week|month)", incoming_message.lower(), re.IGNORECASE).group(2), search_type)
+            
+            att = [
+                {
+                    'fallback':'search results',
+                    'text': '\n'.join(map(lambda x: '{0} - {1}'.format(x[0],x[1]), ox))
+                }
+            ]
+            
+            message.send_webapi('', json.dumps(att))
+        else:
+            message.reply("Answer: " + str(ox[0][0]))
+    else:
+        message.reply("I can't figure that out yet, ask someone in the data team...")
+
+        
+        
+        
 def check_each(incoming_message, date_value):
     m = re.search("(by|each) (day|week|month)", incoming_message.lower(), re.IGNORECASE)
     if m:
