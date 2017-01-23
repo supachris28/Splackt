@@ -72,7 +72,7 @@ def getSimpleSalesData(message, incoming_message, search_type, search_content, s
         
     if sql != "":
         print(sql)
-        message.reply("Looking...")
+        #message.reply("Looking...")
         res = titlator.db.p.execute(sql)
         ox = res.fetchall()
         
@@ -164,7 +164,7 @@ def getSimpleEngagementData(message, incoming_message, search_type, search_conte
         
     if sql != "":
         print(sql)
-        message.reply("Looking...")
+        #message.reply("Looking...")
         res = titlator.db.p.execute(sql)
         ox = res.fetchall()
         

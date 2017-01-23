@@ -30,56 +30,59 @@ engagement_keywords = "(page ?views|engagement)"
 
 
 @respond_to("(.*)")
-@listen_to("(.*)")
+#@listen_to("(.*)")
 def testLooking(message, incoming_message):
-    
-    incoming_message = incoming_message.replace('?', '')
-    
-    #data search variables
-    search_type = ""
-    search_content = ""
-    search_period = ""
+    try:
+        incoming_message = incoming_message.replace('?', '')
+        
+        #data search variables
+        search_type = ""
+        search_content = ""
+        search_period = ""
 
-    response = "You're looking for"
-    
-    if re.search(sales_keywords, incoming_message, re.IGNORECASE):
-        response += " sales (value)"
-        search_type = "sales-value"
-    
-    if re.search(quantity_keywords, incoming_message, re.IGNORECASE):
-        response += " sales (volume)"
-        search_type = "sales-volume"
-    
-    m = re.search(engagement_keywords, incoming_message, re.IGNORECASE)
-    if m:
-        response += " " + m.group(0)
-        search_type = "engagement"
-    
-    
-    response += " info"
-    
-    
-    if response == "You're looking for info":
-        response = "I don't understand you.... try it again in Klingon"
-        return
-    
-    m = re.search(product_types, incoming_message, re.IGNORECASE)
-    if m:
-        response += " for " + m.group(0)
-        search_content = m.group(0)
-    
-    tagged = timex.tag(incoming_message)
-    print (tagged)
-    base_date = datetime.datetime.now()
-    grounded = timex.ground(tagged, base_date)
-    
-    print(grounded)
-    
-    m = re.search("TIMEX2 val=\"(.*)\"", grounded)
-    if m:
-        response += " over the period " + m.group(1)
-        search_period = m.group(1)
-    
-    
-    message.reply(response)
-    splackt_helper.getSimpleSalesData(message, incoming_message, search_type, search_content, search_period)
+        response = "You're looking for"
+        
+        if re.search(sales_keywords, incoming_message, re.IGNORECASE):
+            response += " sales (value)"
+            search_type = "sales-value"
+        
+        if re.search(quantity_keywords, incoming_message, re.IGNORECASE):
+            response += " sales (volume)"
+            search_type = "sales-volume"
+        
+        m = re.search(engagement_keywords, incoming_message, re.IGNORECASE)
+        if m:
+            response += " " + m.group(0)
+            search_type = "engagement"
+        
+        
+        response += " info"
+        
+        
+        if response == "You're looking for info":
+            response = "I don't understand you.... try it again in Klingon"
+            return
+        
+        m = re.search(product_types, incoming_message, re.IGNORECASE)
+        if m:
+            response += " for " + m.group(0)
+            search_content = m.group(0)
+        
+        tagged = timex.tag(incoming_message)
+        print (tagged)
+        base_date = datetime.datetime.now()
+        grounded = timex.ground(tagged, base_date)
+        
+        print(grounded)
+        
+        m = re.search("TIMEX2 val=\"(.*)\"", grounded)
+        if m:
+            response += " over the period " + m.group(1)
+            search_period = m.group(1)
+        
+        
+        message.reply(response)
+        splackt_helper.getSimpleSalesData(message, incoming_message, search_type, search_content, search_period)
+    except:
+        print('something went wrong....')
+        print(traceback.format_exc())

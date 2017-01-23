@@ -28,7 +28,7 @@ engagement_keywords = "(page ?views|titles? read|books? read|users|pages? read|p
 
 input_check = "(.*" + engagement_keywords + ".*)"
 @respond_to(input_check)
-@listen_to(input_check)
+#@listen_to(input_check)
 def testLooking(message, incoming_message, type):
     try:
         print('[splackt_engagement] verifying')
