@@ -1,3 +1,5 @@
+# coding=utf-8
+
 from slackbot.bot import respond_to, listen_to
 import io
 import re
@@ -11,12 +13,17 @@ import datetime
 import calendar
 from isoweek import Week
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 import slackbot_settings
 
 #import pandas
 
 g = py2neo.Graph('http://neo4j:skynet@178.62.55.202:7474/db/data')
+
+
+#Change mpl backend
+matplotlib.use('Agg')
 
 
 # standard word lists
@@ -140,10 +147,11 @@ def getSimpleData(message, incoming_message, search_type, search_content, search
     if sql != "":
         print(sql)
         message.reply("Looking...")
-        ox = titlator.db.p.ex(sql)
+        res = titlator.db.p.execute(sql)
+        ox = res.fetchall()
         
         
-        #print(ox)
+        print(ox)
         if group_by:
             plot_results(message, ox, "", re.search("(by|each) (day|week|month)", incoming_message.lower(), re.IGNORECASE).group(2), search_type)
             message.reply('\n'.join(map(lambda x: '%s - %s' %x, ox)))
@@ -228,16 +236,16 @@ def search_titles(message, title=''):
     message.reply('k, Looking for 20 recent titles containing the string "%s"'% title)
     ox = titlator.db.p.ex('''
         SELECT isbn10, published_date,CONVERT(title using ascii) from home.dim_products
-         WHERE title like \'%%%s%%\' 
+         WHERE title like \'%%'''+title+'''%%\' 
              and published_date < curdate()
              and type='books'
          order by published_date desc
-        ''' % title)
+        ''')
     message.reply('Found %d Results' % len(ox))
     att = [
         {
             'fallback':'Search Results',
-            'text':'\n'.join(map(lambda x: '%s - [%s] - %s' %x, ox[:20]))
+            'text':'\n'.join(map(lambda x: '{0} - [{1}] - {2}'.format(*x), ox[:20]))
         }
     ]
     message.send_webapi('',json.dumps(att))

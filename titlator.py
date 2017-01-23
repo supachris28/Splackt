@@ -7,7 +7,7 @@
 
 import dbapi
 
-db = dbapi.dbs(l=False, s=False)
+db = dbapi.dbs(l=False, s=False, ms=False)
 
 
 def levenshteinDistance(s1, s2):
