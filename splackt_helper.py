@@ -2,6 +2,7 @@
 
 from slackbot.bot import respond_to, listen_to
 import io
+import os
 import re
 import uuid
 import py2neo
@@ -14,6 +15,7 @@ import calendar
 from isoweek import Week
 import numpy as np
 import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import slackbot_settings
 
@@ -164,7 +166,13 @@ def plot_results(message, result, title, x_label, y_label):
 
     plt.setp(xtickNames, rotation=45, fontsize=10)
     fig.subplots_adjust(bottom=0.2,left=0.15)
-    filename = str(uuid.uuid1()) + '.png'
+    filename = 'charts/' + str(uuid.uuid1()) + '.png'
+    dir = os.path.dirname(filename)
+
+    try:
+        os.stat(dir)
+    except:
+        os.mkdir(dir)  
     plt.savefig(filename)
     post_image(filename, slackbot_settings.API_TOKEN, message.channel._body['id'])
     
@@ -172,4 +180,4 @@ def plot_results(message, result, title, x_label, y_label):
 def post_image(filename, token, channels):
     f = {'file': (filename, open(filename, 'rb'), 'image/png', {'Expires':'0'})}
     response = requests.post(url='https://slack.com/api/files.upload', data={'token': token, 'channels': channels, 'media': f}, headers={'Accept': 'application/json'}, files=f)
-    print(response.text)
+    #print(response.text)

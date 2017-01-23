@@ -13,18 +13,11 @@ import datetime
 import calendar
 from isoweek import Week
 import numpy as np
-import matplotlib
-import matplotlib.pyplot as plt
 import slackbot_settings
 
 #import pandas
 
 g = py2neo.Graph('http://neo4j:skynet@178.62.55.202:7474/db/data')
-
-
-#Change mpl backend
-matplotlib.use('Agg')
-
 
 # standard word lists
 product_types = "(book|ebook|video|subscription)"
