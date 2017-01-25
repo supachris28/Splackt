@@ -10,6 +10,7 @@ import titlator, json
 import requests
 import timex
 import datetime
+import traceback
 import calendar
 from isoweek import Week
 import numpy as np

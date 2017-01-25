@@ -4,16 +4,19 @@ import re
 import json
 import requests
 import slackbot_settings
+import traceback
 
 jira_reg = '(\w+-\d+)'
 @listen_to(jira_reg)
-#@respond_to(jira_reg)
+@respond_to(jira_reg)
 def check_slack(message, incoming_message):
     try:
         jira_url = 'https://packtpub.atlassian.net/rest/api/2/search?jql=id=' + incoming_message
         print('checking JIRA for ' + incoming_message)
-        r = requests.get(url=jira_url, headers={'Authorization': splackt_settings.JIRA_AUTH, 'Content-Type': 'application/json', 'accept':'application/json'})
+        r = requests.get(url=jira_url, headers={'Authorization': slackbot_settings.JIRA_AUTH, 'Content-Type': 'application/json', 'accept':'application/json'})
+        #print (r)
         j = r.json()
+        #print(j)
         if r.status_code == 200 and j['total'] == 1:
             title = j['issues'][0]['fields']['summary']
             status = j['issues'][0]['fields']['status']['name']
